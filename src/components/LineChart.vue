@@ -10,8 +10,7 @@ export default {
       console.log(a, b)
     }
   },
-  mounted() {    
-    console.log("TEST")
+  mounted() {        
     this.renderChart(this.data, this.options);
   }
 };
