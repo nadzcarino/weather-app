@@ -41,6 +41,7 @@ export default {
   },
 
   created() {
+    console.log("CREATING...")
     this.getData();
   },
 
