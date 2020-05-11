@@ -1,17 +1,23 @@
 <template>
-  <div id="app">    
-    <select v-model="city" @change="getData">
+  <div id="app">          
+    <div v-if="loaded">      
+      <select v-model="city" @change="getData">
       <option value="Manila">Manila</option>
       <option value="London">London</option>
-      <option value="Tokyo">Tokyo</option>
-    </select>    
-    <LineChart v-if="loaded" :data="chartData" :options="options" />
+      <option value="Yokohama">Yokohama</option>
+      <option value="Jakarta">Jarkata</option>
+      <option value="Delhi">Delhi</option>
+    </select> 
+    <h3>{{ `5 Days Temperature forecast for ${city}` }}</h3>   
+    <LineChart :data="chartData" :options="options"/>
+    </div>
   </div>
 </template>
 
 <script>
 import LineChart from "./components/LineChart";
 import axios from "axios";
+import * as moment from "moment/moment";
 
 export default {
   name: "App",
@@ -27,11 +33,10 @@ export default {
         labels: [],
         datasets: [
           {
-            label: '',
-            backgroundColor: "",
+            label: '',            
             data: []
           }
-        ]
+        ] 
       },
       options: {
         responsive: true,
@@ -40,28 +45,32 @@ export default {
     };
   },
 
-  created() {
-    console.log("CREATING...")
+  created() {        
     this.getData();
   },
 
   methods: {
-    getData() {
+    getData() {         
+      let chartData = [];  
+      let chartLabel = [];
+      this.loaded = false;
       axios
-      .get(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${this.city}&&appid=bb752597415c47f3f901009e150a280e`
+      .get(        
+        `https://api.openweathermap.org/data/2.5/forecast?q=${this.city}&units=metric&&appid=bb752597415c47f3f901009e150a280e`
       )
-      .then(response => {
-        this.chartData.datasets[0].label = `${this.city} weather forecast`;
-        this.chartData.labels = Object.keys(response.data.list[0].main);
-        this.chartData.datasets[0].data = Object.values(
-          response.data.list[0].main
-        );
-        this.loaded = true;        
+      .then(response => {        
+        response.data.list.forEach(datum => {          
+          chartLabel.push(moment(datum.dt * 1000).format("M/D LT"));               
+          chartData.push(datum.main.temp);          
+        });
+        this.chartData.labels = chartLabel;
+        this.chartData.datasets[0].data = chartData;
+        this.chartData.datasets[0].label = this.city;
+        this.loaded = true; 
       })
-      .catch(error => console.log(error));
-    }
-  }
+      .catch(error => console.log(error));      
+    }    
+  }    
 };
 </script>
 
